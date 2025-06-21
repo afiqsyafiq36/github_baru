@@ -38,12 +38,12 @@
 
     <!-- Game Section -->
     <section class="p-10 text-center">
-      <h2 class="text-3xl font-bold mb-6">Play My Mini Game</h2>
-      <div class="border-2 border-purple-500 rounded-lg p-4 max-w-md mx-auto">
-        <canvas id="gameCanvas" class="bg-gray-800 rounded mb-4 w-full"></canvas>
-        <p id="score" class="text-xl">Score: 0</p>
-      </div>
-    </section>
+  <div id="gameContainer">
+    <h2 class="text-3xl font-bold mb-6">Play My Mini Game</h2>
+    <canvas id="gameCanvas" class="bg-gray-800 rounded mb-4 w-full"></canvas>
+    <p id="score" class="text-xl">Score: 0</p>
+  </div>
+</section>
   </div>
 
   <script>
@@ -69,21 +69,31 @@
     });
 
     
-  // ===== MINI GAME FIXED VERSION =====
+  
+  // ===== MINI GAME WITH START/GAME OVER =====
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const scoreElement = document.getElementById('score');
+  const startButton = document.createElement('button');
   let score = 0;
+  let highScore = 0;
+  let gameActive = false;
+  let target = { x: 0, y: 0 };
 
-  // Fix canvas size (must match CSS)
+  // Setup UI
+  startButton.textContent = 'START GAME';
+  startButton.className = 'px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 mb-4';
+  document.querySelector('#gameContainer').prepend(startButton);
+
+  // Fix canvas size
   function resizeCanvas() {
     canvas.width = canvas.offsetWidth;
-    canvas.height = 300; // Fixed height
+    canvas.height = 300;
   }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // Game logic
+  // Game functions
   function drawTarget(x, y) {
     ctx.fillStyle = '#FF5252';
     ctx.beginPath();
@@ -102,11 +112,32 @@
     };
   }
 
-  let target = getRandomPosition();
-  drawTarget(target.x, target.y);
+  function endGame() {
+    gameActive = false;
+    clearCanvas();
+    ctx.fillStyle = 'white';
+    ctx.font = '24px Arial';
+    ctx.fillText('GAME OVER!', canvas.width/2 - 80, canvas.height/2);
+    startButton.textContent = 'RESTART GAME';
+    highScore = Math.max(highScore, score);
+    scoreElement.innerHTML = `Score: ${score} | High Score: ${highScore}`;
+    score = 0;
+  }
 
-  // Click event (fixed for mobile/desktop)
+  function startGame() {
+    gameActive = true;
+    clearCanvas();
+    target = getRandomPosition();
+    drawTarget(target.x, target.y);
+    scoreElement.textContent = `Score: ${score}`;
+  }
+
+  // Event listeners
+  startButton.addEventListener('click', startGame);
+
   canvas.addEventListener('click', (e) => {
+    if (!gameActive) return;
+    
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -121,12 +152,15 @@
       clearCanvas();
       target = getRandomPosition();
       drawTarget(target.x, target.y);
+    } else {
+      endGame();
     }
   });
 
   // Touch support for mobile
   canvas.addEventListener('touchend', (e) => {
-    e.preventDefault(); // Prevent scrolling
+    if (!gameActive) return;
+    e.preventDefault();
     const touch = e.changedTouches[0];
     const mouseEvent = new MouseEvent('click', {
       clientX: touch.clientX,
@@ -134,6 +168,7 @@
     });
     canvas.dispatchEvent(mouseEvent);
   });
+
 
 
     // Simple animation for projects section
