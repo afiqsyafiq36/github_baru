@@ -3,47 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Portfolio + Mini Game</title>
+  <title>Portfolio + Game</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Animation styles */
-    .fade-in {
-      animation: fadeIn 0.8s ease-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Game canvas styles */
+    /* Game Canvas Styles */
     #gameCanvas {
       background: #1f2937;
       display: block;
       margin: 0 auto;
-      touch-action: none; /* Prevent scrolling on mobile */
+      touch-action: none;
+      border: 2px solid #8b5cf6;
+      border-radius: 0.5rem;
     }
     
-    /* Project card hover effect */
-    .project-card {
-      transition: transform 0.3s, box-shadow 0.3s;
+    /* Button Position Fix */
+    #gameContainer {
+      position: relative;
     }
-    .project-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    #startBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
     }
   </style>
 </head>
-<body class="bg-gradient-to-b from-gray-900 to-purple-900 text-white min-h-screen">
-  <!-- Header Section -->
-  <header class="text-center py-12 fade-in">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4">My Portfolio</h1>
-    <p class="text-xl text-purple-300">Showcase of my projects and skills</p>
-  </header>
-
-  <!-- Projects Section -->
-  <section class="container mx-auto px-6 py-12">
-    <h2 class="text-3xl font-bold mb-8 text-center fade-in">My Projects</h2>
-    
+<body class="bg-gradient-to-b from-gray-900 to-purple-900 text-white">
+  <!-- Projects Section --> 
+  <section class="container mx-auto px-4 py-12">
+    <!-- ... your project cards ... -->
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       <!-- Project 1 -->
       <div class="project-card bg-gray-800 rounded-xl p-6 shadow-lg fade-in" style="animation-delay: 0.1s">
@@ -51,141 +40,77 @@
         <p class="text-gray-300 mb-4">Natural language processing chatbot built with Python and TensorFlow.</p>
         <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">View Project</a>
       </div>
-      
-      <!-- Project 2 -->
-      <div class="project-card bg-gray-800 rounded-xl p-6 shadow-lg fade-in" style="animation-delay: 0.2s">
-        <h3 class="text-2xl font-bold mb-3">E-commerce Site</h3>
-        <p class="text-gray-300 mb-4">Full-featured online store with React and Node.js backend.</p>
-        <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">View Project</a>
-      </div>
-      
-      <!-- Project 3 -->
-      <div class="project-card bg-gray-800 rounded-xl p-6 shadow-lg fade-in" style="animation-delay: 0.3s">
-        <h3 class="text-2xl font-bold mb-3">Portfolio Website</h3>
-        <p class="text-gray-300 mb-4">Responsive portfolio site with interactive elements.</p>
-        <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">View Project</a>
-      </div>
     </div>
   </section>
 
   <!-- Game Section -->
-  <section class="container mx-auto px-6 py-12">
-    <h2 class="text-3xl font-bold mb-8 text-center fade-in">Mini Game</h2>
-    
-    <div class="max-w-md mx-auto bg-gray-800 rounded-xl shadow-xl overflow-hidden p-6">
-      <canvas id="gameCanvas" width="400" height="300" class="rounded-lg mb-4 border-2 border-purple-500"></canvas>
-      <div class="flex justify-between items-center">
-        <p id="score" class="text-xl">Score: 0 | High: 0</p>
-        <button id="startBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">Start Game</button>
+  <section class="py-12">
+    <div class="mx-auto px-4 max-w-md">
+      <h2 class="text-3xl font-bold mb-6 text-center">Mini Game</h2>
+      <div id="gameContainer" class="bg-gray-800 rounded-xl p-4 relative">
+        <!-- Canvas akan auto-resize -->
+        <canvas id="gameCanvas" width="400" height="300"></canvas>
+        <!-- Button Tengah -->
+        <button id="startBtn" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg shadow-lg transition">
+          START GAME
+        </button>
+        <p id="score" class="text-lg mt-4 text-center">Score: 0 | High: 0</p>
       </div>
     </div>
   </section>
 
   <script>
-    // ========== PROJECTS INTERACTION ==========
-    document.addEventListener('DOMContentLoaded', () => {
-      // Add animation to project cards when they come into view
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-          }
-        });
-      }, { threshold: 0.1 });
-      
-      document.querySelectorAll('.project-card').forEach(card => {
-        observer.observe(card);
-      });
-    });
-
-    // ========== GAME CODE ==========
+    // ===== GAME CODE =====
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const scoreElement = document.getElementById('score');
     const startBtn = document.getElementById('startBtn');
+    const scoreElement = document.getElementById('score');
     
     // Game variables
-    let score = 0;
-    let highScore = 0;
-    let gameActive = false;
+    let score = 0, highScore = 0, gameActive = false;
     let target = { x: 0, y: 0, radius: 15 };
-    let animationFrameId = null;
-    
-    // Colors
-    const colors = {
-      background: '#1f2937',
-      target: '#ef4444',
-      button: '#10b981',
-      text: '#ffffff',
-      overlay: 'rgba(0, 0, 0, 0.7)'
-    };
 
     // Draw functions
-    function drawTarget(x, y) {
+    function drawTarget() {
       ctx.beginPath();
-      ctx.arc(x, y, target.radius, 0, Math.PI * 2);
-      ctx.fillStyle = colors.target;
+      ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
       ctx.fill();
     }
 
-    function drawStartScreen() {
-      ctx.fillStyle = colors.overlay;
+    function showStartScreen() {
+      ctx.fillStyle = 'rgba(31, 41, 55, 0.8)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.fillStyle = colors.text;
-      ctx.font = '24px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('CLICK THE RED TARGETS', canvas.width/2, canvas.height/2 - 30);
-      ctx.font = '18px Arial';
-      ctx.fillText('Click Start Game to begin', canvas.width/2, canvas.height/2 + 20);
-    }
-
-    function drawGameOver() {
-      ctx.fillStyle = colors.overlay;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.fillStyle = colors.text;
-      ctx.font = '28px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER!', canvas.width/2, canvas.height/2 - 40);
+      ctx.fillStyle = 'white';
       ctx.font = '20px Arial';
-      ctx.fillText(`Your Score: ${score}`, canvas.width/2, canvas.height/2);
-      ctx.fillText(`High Score: ${highScore}`, canvas.width/2, canvas.height/2 + 40);
+      ctx.textAlign = 'center';
+      ctx.fillText('Click START to play!', canvas.width/2, canvas.height/2 - 20);
     }
 
-    // Game logic
     function startGame() {
-      if (gameActive) return;
-      
       score = 0;
       gameActive = true;
-      startBtn.textContent = 'Restart Game';
+      startBtn.style.display = 'none';
       scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
       spawnTarget();
     }
 
     function spawnTarget() {
-      // Cancel any pending animation
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      
       target = {
-        x: target.radius + Math.random() * (canvas.width - target.radius * 2),
-        y: target.radius + Math.random() * (canvas.height - target.radius * 2),
+        x: 15 + Math.random() * (canvas.width - 30),
+        y: 15 + Math.random() * (canvas.height - 30),
         radius: 15
       };
-      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawTarget(target.x, target.y);
+      drawTarget();
     }
 
     function endGame() {
       gameActive = false;
       highScore = Math.max(highScore, score);
-      scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
-      drawGameOver();
+      startBtn.textContent = 'PLAY AGAIN';
+      startBtn.style.display = 'block';
+      showStartScreen();
     }
 
     // Event listeners
@@ -195,15 +120,11 @@
       if (!gameActive) return;
       
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const mouseX = (e.clientX - rect.left) * scaleX;
-      const mouseY = (e.clientY - rect.top) * scaleY;
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
       
-      // Check target hit
-      const distance = Math.sqrt(
-        Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
-      );
+      // Check hit
+      const distance = Math.sqrt((x - target.x) ** 2 + (y - target.y) ** 2);
       
       if (distance < target.radius) {
         score++;
@@ -214,34 +135,19 @@
       }
     });
 
-    // Touch support for mobile
+    // Mobile touch support
     canvas.addEventListener('touchend', (e) => {
-      if (!gameActive) return;
       e.preventDefault();
-      
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
       const touch = e.changedTouches[0];
-      const mouseX = (touch.clientX - rect.left) * scaleX;
-      const mouseY = (touch.clientY - rect.top) * scaleY;
-      
-      // Check target hit
-      const distance = Math.sqrt(
-        Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
-      );
-      
-      if (distance < target.radius) {
-        score++;
-        scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
-        spawnTarget();
-      } else {
-        endGame();
-      }
+      const mouseEvent = new MouseEvent('click', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
     });
 
-    // Initialize game
-    drawStartScreen();
+    // Initialize
+    showStartScreen();
   </script>
 </body>
 </html>
