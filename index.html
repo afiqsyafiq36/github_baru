@@ -68,48 +68,73 @@
       projectsSection.appendChild(projectDiv);
     });
 
-    // ===== MINI GAME =====
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const scoreElement = document.getElementById('score');
-    let score = 0;
+    
+  // ===== MINI GAME FIXED VERSION =====
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const scoreElement = document.getElementById('score');
+  let score = 0;
 
-    // Set canvas size
-    canvas.width = 400;
-    canvas.height = 300;
+  // Fix canvas size (must match CSS)
+  function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 300; // Fixed height
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-    // Game logic
-    function createTarget() {
-      const x = Math.random() * (canvas.width - 30);
-      const y = Math.random() * (canvas.height - 30);
-      
-      ctx.fillStyle = '#FF5252';
-      ctx.beginPath();
-      ctx.arc(x, y, 15, 0, Math.PI * 2);
-      ctx.fill();
+  // Game logic
+  function drawTarget(x, y) {
+    ctx.fillStyle = '#FF5252';
+    ctx.beginPath();
+    ctx.arc(x, y, 15, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
-      return { x, y };
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function getRandomPosition() {
+    return {
+      x: 15 + Math.random() * (canvas.width - 30),
+      y: 15 + Math.random() * (canvas.height - 30)
+    };
+  }
+
+  let target = getRandomPosition();
+  drawTarget(target.x, target.y);
+
+  // Click event (fixed for mobile/desktop)
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const distance = Math.sqrt(
+      Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
+    );
+
+    if (distance < 15) {
+      score++;
+      scoreElement.textContent = `Score: ${score}`;
+      clearCanvas();
+      target = getRandomPosition();
+      drawTarget(target.x, target.y);
     }
+  });
 
-    let target = createTarget();
-
-    canvas.addEventListener('click', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      // Check if click hit target
-      const distance = Math.sqrt(
-        Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
-      );
-
-      if (distance < 15) {
-        score++;
-        scoreElement.textContent = `Score: ${score}`;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        target = createTarget();
-      }
+  // Touch support for mobile
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault(); // Prevent scrolling
+    const touch = e.changedTouches[0];
+    const mouseEvent = new MouseEvent('click', {
+      clientX: touch.clientX,
+      clientY: touch.clientY
     });
+    canvas.dispatchEvent(mouseEvent);
+  });
+
 
     // Simple animation for projects section
     document.addEventListener('DOMContentLoaded', () => {
