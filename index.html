@@ -21,6 +21,11 @@
       transform: scale(1.05);
       transition: transform 0.3s;
     }
+    #gameCanvas {
+      background: #1f2937;
+      display: block;
+      margin: 0 auto;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-gray-900 to-purple-900 text-white">
@@ -37,10 +42,8 @@
     </section>
 
     <!-- Game Section -->
-    <section class="p-10 text-center">
-  <canvas id="gameCanvas" class="bg-gray-800 rounded mb-4 w-full h-[300px]"></canvas>
-  <p id="score" class="text-xl">Score: 0</p>
-</section>
+    <canvas id="gameCanvas" width="400" height="300" class="rounded-lg mb-4 border-2 border-purple-500"></canvas>
+    <p id="score" class="text-xl mb-2">Score: 0 | High: 0</p>
   </div>
 
   <script>
@@ -133,73 +136,143 @@
   function getRandomPosition() {
     return {
       x: 15 + Math.random() * (canvas.width - 30),
-      y: 15 + Math.random() * (canvas.height - 30)
+ // ========== GAME CODE ==========
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    
+    // Game variables
+    let score = 0;
+    let highScore = 0;
+    let gameActive = false;
+    let target = { x: 0, y: 0, radius: 15 };
+    
+    // Colors
+    const colors = {
+      background: '#1f2937',
+      target: '#ef4444',
+      button: '#10b981',
+      text: '#ffffff'
     };
-  }
 
-  // Initial screen
-  function drawStartScreen() {
-    clearCanvas();
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = 'white';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('CLICK TARGET GAME', canvas.width/2, canvas.height/2 - 30);
-    
-    drawButton('START');
-  }
-
-  // Click handler
-  canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    if (!gameActive) {
-      // Check if clicked START/RESTART button
-      if (
-        mouseX > canvas.width/2 - 60 && 
-        mouseX < canvas.width/2 + 60 && 
-        mouseY > canvas.height/2 - 20 && 
-        mouseY < canvas.height/2 + 20
-      ) {
-        startGame();
-      }
-      return;
+    // Draw functions
+    function drawTarget(x, y) {
+      ctx.beginPath();
+      ctx.arc(x, y, target.radius, 0, Math.PI * 2);
+      ctx.fillStyle = colors.target;
+      ctx.fill();
     }
-    
-    // Gameplay click
-    const distance = Math.sqrt(
-      Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
-    );
-    
-    if (distance < 15) {
-      score++;
-      scoreElement.textContent = `Score: ${score}`;
-      clearCanvas();
-      target = getRandomPosition();
+
+    function drawButton(text, x, y, width = 120, height = 40) {
+      ctx.fillStyle = colors.button;
+      ctx.roundRect(x - width/2, y - height/2, width, height, 5);
+      ctx.fill();
+      
+      ctx.fillStyle = colors.text;
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, x, y);
+    }
+
+    function drawStartScreen() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = colors.text;
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('CLICK TARGET GAME', canvas.width/2, canvas.height/2 - 40);
+      
+      drawButton('START', canvas.width/2, canvas.height/2 + 20);
+    }
+
+    function drawGameOver() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = colors.text;
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER!', canvas.width/2, canvas.height/2 - 40);
+      ctx.font = '18px Arial';
+      ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2);
+      ctx.fillText(`High Score: ${highScore}`, canvas.width/2, canvas.height/2 + 30);
+      
+      drawButton('PLAY AGAIN', canvas.width/2, canvas.height/2 + 80);
+    }
+
+    // Game logic
+    function startGame() {
+      score = 0;
+      gameActive = true;
+      scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
+      spawnTarget();
+    }
+
+    function spawnTarget() {
+      target = {
+        x: target.radius + Math.random() * (canvas.width - target.radius * 2),
+        y: target.radius + Math.random() * (canvas.height - target.radius * 2),
+        radius: 15
+      };
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawTarget(target.x, target.y);
-    } else {
-      highScore = Math.max(highScore, score);
-      endGame();
     }
-  });
 
-  // Touch support
-  canvas.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    const touch = e.changedTouches[0];
-    const mouseEvent = new MouseEvent('click', {
-      clientX: touch.clientX,
-      clientY: touch.clientY
+    function endGame() {
+      gameActive = false;
+      highScore = Math.max(highScore, score);
+      scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
+      drawGameOver();
+    }
+
+    // Event listeners
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      if (!gameActive) {
+        // Check if clicked button
+        if (
+          mouseX > canvas.width/2 - 60 && 
+          mouseX < canvas.width/2 + 60 && 
+          mouseY > canvas.height/2 && 
+          mouseY < canvas.height/2 + 40
+        ) {
+          startGame();
+        }
+        return;
+      }
+      
+      // Check target hit
+      const distance = Math.sqrt(
+        Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
+      );
+      
+      if (distance < target.radius) {
+        score++;
+        scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
+        spawnTarget();
+      } else {
+        endGame();
+      }
     });
-    canvas.dispatchEvent(mouseEvent);
-  });
 
-  // First render
-  drawStartScreen();
+    // Touch support
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      const touch = e.changedTouches[0];
+      const mouseEvent = new MouseEvent('click', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    });
+
+    // Initialize
+    drawStartScreen();
     
     // Simple animation for projects section
     document.addEventListener('DOMContentLoaded', () => {
