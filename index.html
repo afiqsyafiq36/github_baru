@@ -3,156 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Portfolio + Game</title>
-  <!-- Tailwind CSS (CDN) -->
+  <title>My Portfolio + Mini Game</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Framer Motion (CDN) -->
-  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
   <style>
-    /* Custom CSS */
+    /* Animation styles */
     .fade-in {
-      animation: fadeIn 1s ease-in;
+      animation: fadeIn 0.8s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .hover-scale:hover {
-      transform: scale(1.05);
-      transition: transform 0.3s;
-    }
+    
+    /* Game canvas styles */
     #gameCanvas {
       background: #1f2937;
       display: block;
       margin: 0 auto;
+      touch-action: none; /* Prevent scrolling on mobile */
+    }
+    
+    /* Project card hover effect */
+    .project-card {
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-gray-900 to-purple-900 text-white">
-  <div id="root">
-    <!-- Hero Section -->
-    <section class="p-10 text-center fade-in">
-      <h1 class="text-4xl font-bold mb-4">My Projects</h1>
-      <p>Interactive showcase of my work</p>
-    </section>
+<body class="bg-gradient-to-b from-gray-900 to-purple-900 text-white min-h-screen">
+  <!-- Header Section -->
+  <header class="text-center py-12 fade-in">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">My Portfolio</h1>
+    <p class="text-xl text-purple-300">Showcase of my projects and skills</p>
+  </header>
 
-    <!-- Projects Section -->
-    <section id="projects" class="p-10 grid md:grid-cols-2 gap-8">
-      <!-- Projects will be added by JS -->
-    </section>
+  <!-- Projects Section -->
+  <section class="container mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold mb-8 text-center fade-in">My Projects</h2>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Project 1 -->
+      <div class="project-card bg-gray-800 rounded-xl p-6 shadow-lg fade-in" style="animation-delay: 0.1s">
+        <h3 class="text-2xl font-bold mb-3">AI Chatbot</h3>
+        <p class="text-gray-300 mb-4">Natural language processing chatbot built with Python and TensorFlow.</p>
+        <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">View Project</a>
+      </div>
+      
+      <!-- Project 2 -->
+      <div class="project-card bg-gray-800 rounded-xl p-6 shadow-lg fade-in" style="animation-delay: 0.2s">
+        <h3 class="text-2xl font-bold mb-3">E-commerce Site</h3>
+        <p class="text-gray-300 mb-4">Full-featured online store with React and Node.js backend.</p>
+        <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">View Project</a>
+      </div>
+      
+      <!-- Project 3 -->
+      <div class="project-card bg-gray-800 rounded-xl p-6 shadow-lg fade-in" style="animation-delay: 0.3s">
+        <h3 class="text-2xl font-bold mb-3">Portfolio Website</h3>
+        <p class="text-gray-300 mb-4">Responsive portfolio site with interactive elements.</p>
+        <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">View Project</a>
+      </div>
+    </div>
+  </section>
 
-    <!-- Game Section -->
-    <canvas id="gameCanvas" width="400" height="300" class="rounded-lg mb-4 border-2 border-purple-500"></canvas>
-    <p id="score" class="text-xl mb-2">Score: 0 | High: 0</p>
-  </div>
+  <!-- Game Section -->
+  <section class="container mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold mb-8 text-center fade-in">Mini Game</h2>
+    
+    <div class="max-w-md mx-auto bg-gray-800 rounded-xl shadow-xl overflow-hidden p-6">
+      <canvas id="gameCanvas" width="400" height="300" class="rounded-lg mb-4 border-2 border-purple-500"></canvas>
+      <div class="flex justify-between items-center">
+        <p id="score" class="text-xl">Score: 0 | High: 0</p>
+        <button id="startBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">Start Game</button>
+      </div>
+    </div>
+  </section>
 
   <script>
-    // ===== PROJECTS DATA =====
-    const projects = [
-      { title: "EAES Entrance & Exit Survey", link: "https://eaes.wuaze.com/eaes/index.php?i=1", desc: "Final Year Project for KVDSAZI Course" },
-      { title: "E-commerce Site", link: "#", desc: "Online store with React" }
-    ];
-
-    // ===== RENDER PROJECTS =====
-    const projectsSection = document.getElementById('projects');
-    projects.forEach(project => {
-      const projectDiv = document.createElement('div');
-      projectDiv.className = 'bg-gray-800 p-6 rounded-lg shadow-lg hover-scale';
-      projectDiv.innerHTML = `
-        <h2 class="text-2xl font-bold">${project.title}</h2>
-        <p class="mt-2">${project.desc}</p>
-        <a href="${project.link}" class="mt-4 inline-block px-4 py-2 bg-purple-600 rounded hover:bg-purple-700">
-          View Project
-        </a>
-      `;
-      projectsSection.appendChild(projectDiv);
+    // ========== PROJECTS INTERACTION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add animation to project cards when they come into view
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in');
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      document.querySelectorAll('.project-card').forEach(card => {
+        observer.observe(card);
+      });
     });
 
-    
-  
-  // ===== GAME WITH IN-CANVAS BUTTON =====
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  const scoreElement = document.getElementById('score');
-  let score = 0;
-  let highScore = 0;
-  let gameActive = false;
-  let target = { x: 0, y: 0 };
-
-  // Set canvas size
-  function resizeCanvas() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = 300;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  // Draw UI elements
-  function drawButton(text) {
-    ctx.fillStyle = '#4CAF50';
-    ctx.roundRect(canvas.width/2 - 60, canvas.height/2 - 20, 120, 40, 5);
-    ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.font = '18px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(text, canvas.width/2, canvas.height/2 + 5);
-  }
-
-  function drawTarget(x, y) {
-    ctx.fillStyle = '#FF5252';
-    ctx.beginPath();
-    ctx.arc(x, y, 15, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Game logic
-  function endGame() {
-    gameActive = false;
-    clearCanvas();
-    
-    // Draw game over screen
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = 'white';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('GAME OVER!', canvas.width/2, canvas.height/2 - 30);
-    ctx.font = '16px Arial';
-    ctx.fillText(`Score: ${score} | High: ${highScore}`, canvas.width/2, canvas.height/2 + 10);
-    
-    drawButton('RESTART');
-  }
-
-  function startGame() {
-    gameActive = true;
-    score = 0;
-    scoreElement.textContent = `Score: ${score}`;
-    clearCanvas();
-    target = getRandomPosition();
-    drawTarget(target.x, target.y);
-  }
-
-  function getRandomPosition() {
-    return {
-      x: 15 + Math.random() * (canvas.width - 30),
- // ========== GAME CODE ==========
+    // ========== GAME CODE ==========
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreElement = document.getElementById('score');
+    const startBtn = document.getElementById('startBtn');
     
     // Game variables
     let score = 0;
     let highScore = 0;
     let gameActive = false;
     let target = { x: 0, y: 0, radius: 15 };
+    let animationFrameId = null;
     
     // Colors
     const colors = {
       background: '#1f2937',
       target: '#ef4444',
       button: '#10b981',
-      text: '#ffffff'
+      text: '#ffffff',
+      overlay: 'rgba(0, 0, 0, 0.7)'
     };
 
     // Draw functions
@@ -163,59 +128,55 @@
       ctx.fill();
     }
 
-    function drawButton(text, x, y, width = 120, height = 40) {
-      ctx.fillStyle = colors.button;
-      ctx.roundRect(x - width/2, y - height/2, width, height, 5);
-      ctx.fill();
-      
-      ctx.fillStyle = colors.text;
-      ctx.font = '18px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, x, y);
-    }
-
     function drawStartScreen() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillStyle = colors.overlay;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       ctx.fillStyle = colors.text;
       ctx.font = '24px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('CLICK TARGET GAME', canvas.width/2, canvas.height/2 - 40);
-      
-      drawButton('START', canvas.width/2, canvas.height/2 + 20);
+      ctx.textBaseline = 'middle';
+      ctx.fillText('CLICK THE RED TARGETS', canvas.width/2, canvas.height/2 - 30);
+      ctx.font = '18px Arial';
+      ctx.fillText('Click Start Game to begin', canvas.width/2, canvas.height/2 + 20);
     }
 
     function drawGameOver() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillStyle = colors.overlay;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       ctx.fillStyle = colors.text;
-      ctx.font = '24px Arial';
+      ctx.font = '28px Arial';
       ctx.textAlign = 'center';
       ctx.fillText('GAME OVER!', canvas.width/2, canvas.height/2 - 40);
-      ctx.font = '18px Arial';
-      ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2);
-      ctx.fillText(`High Score: ${highScore}`, canvas.width/2, canvas.height/2 + 30);
-      
-      drawButton('PLAY AGAIN', canvas.width/2, canvas.height/2 + 80);
+      ctx.font = '20px Arial';
+      ctx.fillText(`Your Score: ${score}`, canvas.width/2, canvas.height/2);
+      ctx.fillText(`High Score: ${highScore}`, canvas.width/2, canvas.height/2 + 40);
     }
 
     // Game logic
     function startGame() {
+      if (gameActive) return;
+      
       score = 0;
       gameActive = true;
+      startBtn.textContent = 'Restart Game';
       scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
       spawnTarget();
     }
 
     function spawnTarget() {
+      // Cancel any pending animation
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
       target = {
         x: target.radius + Math.random() * (canvas.width - target.radius * 2),
         y: target.radius + Math.random() * (canvas.height - target.radius * 2),
         radius: 15
       };
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawTarget(target.x, target.y);
     }
@@ -228,23 +189,16 @@
     }
 
     // Event listeners
+    startBtn.addEventListener('click', startGame);
+
     canvas.addEventListener('click', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+      if (!gameActive) return;
       
-      if (!gameActive) {
-        // Check if clicked button
-        if (
-          mouseX > canvas.width/2 - 60 && 
-          mouseX < canvas.width/2 + 60 && 
-          mouseY > canvas.height/2 && 
-          mouseY < canvas.height/2 + 40
-        ) {
-          startGame();
-        }
-        return;
-      }
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
       
       // Check target hit
       const distance = Math.sqrt(
@@ -260,25 +214,34 @@
       }
     });
 
-    // Touch support
+    // Touch support for mobile
     canvas.addEventListener('touchend', (e) => {
+      if (!gameActive) return;
       e.preventDefault();
+      
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
       const touch = e.changedTouches[0];
-      const mouseEvent = new MouseEvent('click', {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      canvas.dispatchEvent(mouseEvent);
+      const mouseX = (touch.clientX - rect.left) * scaleX;
+      const mouseY = (touch.clientY - rect.top) * scaleY;
+      
+      // Check target hit
+      const distance = Math.sqrt(
+        Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
+      );
+      
+      if (distance < target.radius) {
+        score++;
+        scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
+        spawnTarget();
+      } else {
+        endGame();
+      }
     });
 
-    // Initialize
+    // Initialize game
     drawStartScreen();
-    
-    // Simple animation for projects section
-    document.addEventListener('DOMContentLoaded', () => {
-      const projects = document.getElementById('projects');
-      projects.classList.add('fade-in');
-    });
   </script>
 </body>
 </html>
