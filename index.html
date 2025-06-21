@@ -3,10 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio + Game</title>
+  <title>My Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Game Canvas Styles */
+    /* Animasi */
+    .fade-in {
+      animation: fadeIn 0.8s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Game Canvas */
     #gameCanvas {
       background: #1f2937;
       display: block;
@@ -15,84 +24,80 @@
       border: 2px solid #8b5cf6;
       border-radius: 0.5rem;
     }
-    
-    /* Button Position Fix */
-    #gameContainer {
-      position: relative;
+
+    /* Overlay Game */
+    .game-overlay {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(3px);
+      transition: opacity 0.3s;
     }
-    #startBtn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10;
+    .overlay-hidden {
+      opacity: 0;
+      pointer-events: none;
     }
   </style>
 </head>
 <body class="bg-gradient-to-b from-gray-900 to-purple-900 text-white">
-  <!-- Projects Section --> 
-  <section class="container mx-auto px-4 py-12">
-    <!-- ... your project cards ... -->
+  
+  <!-- Projects Section -->
+  <section class="container mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold mb-8 text-center fade-in">My Projects</h2>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Project 1 -->
-      <div class="project-card bg-gray-800 rounded-xl p-6 shadow-lg fade-in" style="animation-delay: 0.1s">
+      <!-- Project Cards -->
+      <div class="project-card fade-in bg-gray-800 rounded-xl p-6 shadow-lg">
         <h3 class="text-2xl font-bold mb-3">AI Chatbot</h3>
-        <p class="text-gray-300 mb-4">Natural language processing chatbot built with Python and TensorFlow.</p>
-        <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">View Project</a>
+        <p class="text-gray-300 mb-4">Chatbot with NLP capabilities</p>
+        <a href="#" class="inline-block px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg">View Project</a>
       </div>
+      <!-- Tambah project lain -->
     </div>
   </section>
 
   <!-- Game Section -->
   <section class="py-12">
     <div class="mx-auto px-4 max-w-md">
-      <h2 class="text-3xl font-bold mb-6 text-center">Mini Game</h2>
-      <div id="gameContainer" class="bg-gray-800 rounded-xl p-4 relative">
-        <!-- Canvas akan auto-resize -->
+      <h2 class="text-3xl font-bold mb-6 text-center fade-in">Mini Game</h2>
+      <div class="bg-gray-800 rounded-xl p-4 relative">
+        <!-- Canvas + Overlay -->
         <canvas id="gameCanvas" width="400" height="300"></canvas>
-        <!-- Button Tengah -->
-        <button id="startBtn" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg shadow-lg transition">
-          START GAME
-        </button>
+        <div id="gameOverlay" class="game-overlay absolute inset-0 flex flex-col items-center justify-center">
+          <h3 id="overlayText" class="text-2xl font-bold mb-4">TARGET CLICK GAME</h3>
+          <button id="startBtn" class="px-8 py-3 bg-green-500 hover:bg-green-600 rounded-lg text-lg">
+            ▶ START
+          </button>
+        </div>
         <p id="score" class="text-lg mt-4 text-center">Score: 0 | High: 0</p>
       </div>
     </div>
   </section>
 
   <script>
-    // ===== GAME CODE =====
+    // ========== GAME CODE ==========
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const startBtn = document.getElementById('startBtn');
     const scoreElement = document.getElementById('score');
-    
-    // Game variables
+    const gameOverlay = document.getElementById('gameOverlay');
+    const overlayText = document.getElementById('overlayText');
+
+    // Game Variables
     let score = 0, highScore = 0, gameActive = false;
     let target = { x: 0, y: 0, radius: 15 };
 
-    // Draw functions
+    // Initialize Canvas
+    function setupCanvas() {
+      const container = document.querySelector('.max-w-md');
+      const maxWidth = container.clientWidth - 32; // Adjust for padding
+      canvas.style.width = `${Math.min(400, maxWidth)}px`;
+      canvas.style.height = `${Math.min(300, maxWidth * 0.75)}px`;
+    }
+
+    // Game Functions
     function drawTarget() {
       ctx.beginPath();
       ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
       ctx.fillStyle = '#ef4444';
       ctx.fill();
-    }
-
-    function showStartScreen() {
-      ctx.fillStyle = 'rgba(31, 41, 55, 0.8)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'white';
-      ctx.font = '20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('Click START to play!', canvas.width/2, canvas.height/2 - 20);
-    }
-
-    function startGame() {
-      score = 0;
-      gameActive = true;
-      startBtn.style.display = 'none';
-      scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
-      spawnTarget();
     }
 
     function spawnTarget() {
@@ -105,15 +110,23 @@
       drawTarget();
     }
 
+    function startGame() {
+      score = 0;
+      gameActive = true;
+      gameOverlay.classList.add('overlay-hidden');
+      scoreElement.textContent = `Score: ${score} | High: ${highScore}`;
+      spawnTarget();
+    }
+
     function endGame() {
       gameActive = false;
       highScore = Math.max(highScore, score);
-      startBtn.textContent = 'PLAY AGAIN';
-      startBtn.style.display = 'block';
-      showStartScreen();
+      overlayText.textContent = `GAME OVER! (Score: ${score})`;
+      startBtn.textContent = "🔄 PLAY AGAIN";
+      gameOverlay.classList.remove('overlay-hidden');
     }
 
-    // Event listeners
+    // Event Listeners
     startBtn.addEventListener('click', startGame);
 
     canvas.addEventListener('click', (e) => {
@@ -123,7 +136,6 @@
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      // Check hit
       const distance = Math.sqrt((x - target.x) ** 2 + (y - target.y) ** 2);
       
       if (distance < target.radius) {
@@ -135,7 +147,7 @@
       }
     });
 
-    // Mobile touch support
+    // Mobile Support
     canvas.addEventListener('touchend', (e) => {
       e.preventDefault();
       const touch = e.changedTouches[0];
@@ -146,8 +158,11 @@
       canvas.dispatchEvent(mouseEvent);
     });
 
-    // Initialize
-    showStartScreen();
+    // Init
+    window.addEventListener('load', () => {
+      setupCanvas();
+      window.addEventListener('resize', setupCanvas);
+    });
   </script>
 </body>
 </html>
