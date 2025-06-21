@@ -2,14 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My First GitHub Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio + Game</title>
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Framer Motion (CDN) -->
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    h1 { color: #3498db; }
+    /* Custom CSS */
+    .fade-in {
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hover-scale:hover {
+      transform: scale(1.05);
+      transition: transform 0.3s;
+    }
   </style>
 </head>
-<body>
-  <h1>Hello, world!</h1>
-  <p>This is my first website hosted on GitHub Pages 🎉</p>
+<body class="min-h-screen bg-gradient-to-b from-gray-900 to-purple-900 text-white">
+  <div id="root">
+    <!-- Hero Section -->
+    <section class="p-10 text-center fade-in">
+      <h1 class="text-4xl font-bold mb-4">My Projects</h1>
+      <p>Interactive showcase of my work</p>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="p-10 grid md:grid-cols-2 gap-8">
+      <!-- Projects will be added by JS -->
+    </section>
+
+    <!-- Game Section -->
+    <section class="p-10 text-center">
+      <h2 class="text-3xl font-bold mb-6">Play My Mini Game</h2>
+      <div class="border-2 border-purple-500 rounded-lg p-4 max-w-md mx-auto">
+        <canvas id="gameCanvas" class="bg-gray-800 rounded mb-4 w-full"></canvas>
+        <p id="score" class="text-xl">Score: 0</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ===== PROJECTS DATA =====
+    const projects = [
+      { title: "AI Chatbot", link: "#", desc: "Chatbot with NLP" },
+      { title: "E-commerce Site", link: "#", desc: "Online store with React" }
+    ];
+
+    // ===== RENDER PROJECTS =====
+    const projectsSection = document.getElementById('projects');
+    projects.forEach(project => {
+      const projectDiv = document.createElement('div');
+      projectDiv.className = 'bg-gray-800 p-6 rounded-lg shadow-lg hover-scale';
+      projectDiv.innerHTML = `
+        <h2 class="text-2xl font-bold">${project.title}</h2>
+        <p class="mt-2">${project.desc}</p>
+        <a href="${project.link}" class="mt-4 inline-block px-4 py-2 bg-purple-600 rounded hover:bg-purple-700">
+          View Project
+        </a>
+      `;
+      projectsSection.appendChild(projectDiv);
+    });
+
+    // ===== MINI GAME =====
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    let score = 0;
+
+    // Set canvas size
+    canvas.width = 400;
+    canvas.height = 300;
+
+    // Game logic
+    function createTarget() {
+      const x = Math.random() * (canvas.width - 30);
+      const y = Math.random() * (canvas.height - 30);
+      
+      ctx.fillStyle = '#FF5252';
+      ctx.beginPath();
+      ctx.arc(x, y, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      return { x, y };
+    }
+
+    let target = createTarget();
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      // Check if click hit target
+      const distance = Math.sqrt(
+        Math.pow(mouseX - target.x, 2) + Math.pow(mouseY - target.y, 2)
+      );
+
+      if (distance < 15) {
+        score++;
+        scoreElement.textContent = `Score: ${score}`;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        target = createTarget();
+      }
+    });
+
+    // Simple animation for projects section
+    document.addEventListener('DOMContentLoaded', () => {
+      const projects = document.getElementById('projects');
+      projects.classList.add('fade-in');
+    });
+  </script>
 </body>
 </html>
